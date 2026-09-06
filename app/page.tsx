@@ -245,6 +245,9 @@ const SCRISOARE: string[] = [
 /** Pune melodia voastra in /public/muzica/ si schimba numele aici. */
 const MUZICA = "/muzica/melodia-noastra.mp3";
 
+/** Intro-ul Netflix, rulat la deschiderea aplicatiei. */
+const INTRO = "/video/intro.mp4";
+
 /** Pozitii fixe (nu random) ca sa nu apara hydration mismatch. */
 const INIMI = [
   { x: "8%", intarziere: 0, durata: 14, marime: 22 },
@@ -313,10 +316,10 @@ function Poster({
 }
 
 /* ================================================================
-   3. SPLASH SCREEN — intro in stilul Netflix
+   3. SPLASH SCREEN — intro-ul Netflix
    ================================================================ */
 
-/** Cele 13 bare care umplu ecranul. Valori fixe, deci nu apare hydration mismatch. */
+/** Cele 13 bare din intro-ul de rezerva. Valori fixe, deci nu apare hydration mismatch. */
 const NR_BARE = 13;
 const BARE = Array.from({ length: NR_BARE }, (_, i) => {
   const distanta = Math.abs(i - (NR_BARE - 1) / 2);
@@ -344,7 +347,7 @@ const BARE_LITERA = Array.from({ length: NR_BARE_LITERA }, (_, i) => ({
   intarziere: 0.1 + Math.abs(i - (NR_BARE_LITERA - 1) / 2) * 0.07,
 }));
 
-/** Conturul literei A (acelasi cu cel din app/icon.svg). */
+/** Conturul literei A (acelasi cu cel din app/icon.svg). Se muta cu 3.5 ca sa cada fix pe centru. */
 const CONTUR_A =
   "M32 10 45 54h-9.2l-2.4-8.6h-9.8L21.2 54H12L25 10h7Zm-1.6 12.6-3.6 15h7.2l-3.6-15Z";
 
@@ -362,59 +365,89 @@ const bara = {
   }),
 };
 
-function SplashView({ onFinish }: { onFinish: () => void }) {
-  const putinaMiscare = useReducedMotion();
-  // 0 = perdeaua de bare, 1 = barele se strang si apare litera
-  const [faza, setFaza] = useState(putinaMiscare ? 1 : 0);
+/** Litera A desenata, folosita si in intro-ul de rezerva si in ecranul de „apasa ca sa incepi". */
+function LiteraA({
+  className = "",
+  umple = true,
+}: {
+  className?: string;
+  umple?: boolean;
+}) {
+  return (
+    <svg viewBox="0 0 64 64" className={className}>
+      <defs>
+        <clipPath id="clip-litera">
+          <path transform="translate(3.5 0)" d={CONTUR_A} />
+        </clipPath>
+      </defs>
+      <g clipPath="url(#clip-litera)">
+        {BARE_LITERA.map((b, i) => (
+          <motion.rect
+            key={i}
+            x={b.x}
+            y={0}
+            width={b.latime}
+            height={64}
+            fill="#e50914"
+            initial={{ scaleY: 0 }}
+            animate={{ scaleY: umple ? 1 : 0 }}
+            transition={{
+              delay: 0.25 + b.intarziere,
+              duration: 0.6,
+              ease: LIN,
+            }}
+            style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}
+          />
+        ))}
+      </g>
+    </svg>
+  );
+}
+
+/**
+ * Intro-ul de rezerva, desenat in CSS. Ruleaza doar daca fisierul video
+ * lipseste sau nu poate fi redat, ca sa nu ramana un ecran negru.
+ */
+function IntroDesenat({ onFinish }: { onFinish: () => void }) {
+  const [faza, setFaza] = useState(0);
 
   useEffect(() => {
-    const total = putinaMiscare ? 1800 : 4000;
     const t1 = setTimeout(() => setFaza(1), 1750);
-    const t2 = setTimeout(onFinish, total);
+    const t2 = setTimeout(onFinish, 4000);
     return () => {
       clearTimeout(t1);
       clearTimeout(t2);
     };
-  }, [onFinish, putinaMiscare]);
+  }, [onFinish]);
 
   return (
-    <motion.div
-      exit={{ opacity: 0, scale: 1.18 }}
-      transition={{ duration: 0.85, ease: LIN }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-black"
-    >
-      {/* perdeaua de bare verticale */}
-      {!putinaMiscare && (
-        <div aria-hidden className="pointer-events-none absolute inset-0">
-          {BARE.map((b, i) => (
-            <motion.div
-              key={i}
-              custom={b}
-              variants={bara}
-              initial="ascuns"
-              animate={faza === 0 ? "deschis" : "inchis"}
-              style={{
-                left: `${b.stanga}%`,
-                width: `${b.latime}%`,
-                height: `${b.inaltime}%`,
-                backgroundImage: b.gradient,
-                transformOrigin: "50% 100%",
-              }}
-              className="absolute bottom-0"
-            />
-          ))}
-
-          {/* lumina care traverseaza perdeaua o singura data */}
+    <div className="absolute inset-0 flex flex-col items-center justify-center overflow-hidden">
+      <div aria-hidden className="pointer-events-none absolute inset-0">
+        {BARE.map((b, i) => (
           <motion.div
-            initial={{ x: "-40%", opacity: 0 }}
-            animate={{ x: "140%", opacity: [0, 1, 1, 0] }}
-            transition={{ delay: 0.85, duration: 0.9, ease: "easeInOut" }}
-            className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent mix-blend-plus-lighter"
+            key={i}
+            custom={b}
+            variants={bara}
+            initial="ascuns"
+            animate={faza === 0 ? "deschis" : "inchis"}
+            style={{
+              left: `${b.stanga}%`,
+              width: `${b.latime}%`,
+              height: `${b.inaltime}%`,
+              backgroundImage: b.gradient,
+              transformOrigin: "50% 100%",
+            }}
+            className="absolute bottom-0"
           />
-        </div>
-      )}
+        ))}
+        <motion.div
+          initial={{ x: "-40%", opacity: 0 }}
+          animate={{ x: "140%", opacity: [0, 1, 1, 0] }}
+          transition={{ delay: 0.85, duration: 0.9, ease: "easeInOut" }}
+          className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent mix-blend-plus-lighter"
+        />
+      </div>
 
-      {/* halou rosu care ramane in spatele literei */}
       <motion.div
         aria-hidden
         initial={{ opacity: 0, scale: 0.6 }}
@@ -427,40 +460,17 @@ function SplashView({ onFinish }: { onFinish: () => void }) {
         className="pointer-events-none absolute h-[70vmin] w-[70vmin] rounded-full bg-netflix blur-[80px] sm:blur-[120px]"
       />
 
-      {/* litera, umpluta de bare dinauntru */}
-      <motion.svg
-        viewBox="0 0 64 64"
+      <motion.div
         initial={{ opacity: 0, scale: 0.82 }}
         animate={faza === 1 ? { opacity: 1, scale: 1 } : { opacity: 0 }}
         transition={{ duration: 0.75, ease: LIN }}
-        className="relative h-[60vmin] w-[60vmin] drop-shadow-[0_0_60px_rgba(229,9,20,0.55)]"
+        className="relative"
       >
-        <defs>
-          <clipPath id="clip-litera">
-            <path d={CONTUR_A} />
-          </clipPath>
-        </defs>
-        <g clipPath="url(#clip-litera)">
-          {BARE_LITERA.map((b, i) => (
-            <motion.rect
-              key={i}
-              x={b.x}
-              y={0}
-              width={b.latime}
-              height={64}
-              fill="#e50914"
-              initial={{ scaleY: 0 }}
-              animate={faza === 1 ? { scaleY: 1 } : { scaleY: 0 }}
-              transition={{
-                delay: 0.25 + b.intarziere,
-                duration: 0.6,
-                ease: LIN,
-              }}
-              style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}
-            />
-          ))}
-        </g>
-      </motion.svg>
+        <LiteraA
+          umple={faza === 1}
+          className="h-[60vmin] w-[60vmin] drop-shadow-[0_0_60px_rgba(229,9,20,0.55)]"
+        />
+      </motion.div>
 
       <motion.p
         initial={{ opacity: 0, y: 14 }}
@@ -470,6 +480,121 @@ function SplashView({ onFinish }: { onFinish: () => void }) {
       >
         ARIANAFLIX
       </motion.p>
+    </div>
+  );
+}
+
+function SplashView({ onFinish }: { onFinish: () => void }) {
+  const video = useRef<HTMLVideoElement>(null);
+  const gata = useRef(false);
+  // "incarca" -> incearca sa porneasca | "gest" -> browserul cere un tap
+  // "ruleaza" -> merge | "eroare" -> cade pe intro-ul desenat
+  const [stare, setStare] = useState<"incarca" | "gest" | "ruleaza" | "eroare">(
+    "incarca",
+  );
+
+  // trecem mai departe o singura data, indiferent din ce cauza
+  const termina = useCallback(() => {
+    if (gata.current) return;
+    gata.current = true;
+    onFinish();
+  }, [onFinish]);
+
+  // incercam sa pornim cu sunet; daca browserul refuza, cerem un tap
+  useEffect(() => {
+    video.current?.play().catch(() => setStare("gest"));
+  }, []);
+
+  // daca play() nu raspunde nici intr-un fel (fisier greu, retea proasta),
+  // aratam tot ecranul de tap in loc sa lasam un ecran negru
+  useEffect(() => {
+    if (stare !== "incarca") return;
+    const t = setTimeout(() => setStare("gest"), 1500);
+    return () => clearTimeout(t);
+  }, [stare]);
+
+  // plasa de siguranta: daca videoul se blocheaza dupa ce a pornit, mergem oricum mai departe
+  useEffect(() => {
+    if (stare !== "ruleaza") return;
+    const t = setTimeout(termina, 9000);
+    return () => clearTimeout(t);
+  }, [stare, termina]);
+
+  const porneste = () => {
+    const v = video.current;
+    if (!v) return;
+    v.muted = false;
+    v.play().catch(() => {
+      // ultima varianta: macar sa se vada, chiar si fara sunet
+      v.muted = true;
+      v.play().catch(() => setStare("eroare"));
+    });
+  };
+
+  return (
+    <motion.div
+      exit={{ opacity: 0, scale: 1.12 }}
+      transition={{ duration: 0.8, ease: LIN }}
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden bg-black"
+    >
+      <video
+        ref={video}
+        src={INTRO}
+        playsInline
+        preload="auto"
+        disablePictureInPicture
+        onPlaying={() => setStare("ruleaza")}
+        onEnded={termina}
+        onError={() => setStare("eroare")}
+        // pe telefon in portret umplem ecranul (ca in aplicatia Netflix),
+        // pe ecrane late aratam cadrul intreg
+        className={`h-full w-full object-cover transition-opacity duration-500 sm:object-contain ${
+          stare === "ruleaza" ? "opacity-100" : "opacity-0"
+        }`}
+      />
+
+      {/* daca browserul blocheaza sunetul, cerem un tap — asa se aude si ta-dum-ul */}
+      {stare === "gest" && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6 }}
+          onClick={porneste}
+          className="absolute inset-0 flex flex-col items-center justify-center gap-6 bg-black"
+        >
+          <motion.div
+            animate={{ scale: [1, 1.05, 1] }}
+            transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+          >
+            <LiteraA className="h-[34vmin] w-[34vmin] drop-shadow-[0_0_50px_rgba(229,9,20,0.5)]" />
+          </motion.div>
+          <div className="text-center">
+            <p className="font-display text-2xl tracking-[0.35em] text-white sm:text-3xl">
+              APASĂ CA SĂ ÎNCEPI
+            </p>
+            <p className="mt-2 text-sm text-zinc-500">
+              Dă volumul mai tare. Merită.
+            </p>
+          </div>
+        </motion.button>
+      )}
+
+      {/* fara fisier video ramane intro-ul desenat, nu un ecran negru */}
+      {stare === "eroare" && <IntroDesenat onFinish={termina} />}
+
+      {/* skip discret, ca la Netflix */}
+      {stare === "ruleaza" && (
+        <motion.button
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1.4, duration: 0.5 }}
+          whileTap={APASARE}
+          onClick={termina}
+          className="absolute bottom-6 right-4 flex min-h-11 items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white/70 backdrop-blur-md hover:text-white sm:bottom-10 sm:right-8"
+        >
+          Sari peste <ChevronRight className="h-4 w-4" />
+        </motion.button>
+      )}
     </motion.div>
   );
 }
@@ -548,7 +673,11 @@ function ProfilesView({ onAriana }: { onAriana: () => void }) {
             </span>
             <motion.span
               animate={{ scale: [1, 1.18, 1] }}
-              transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+              transition={{
+                duration: 1.6,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
               className="absolute bottom-2 right-2 text-lg sm:text-2xl"
             >
               ❤️
@@ -797,7 +926,10 @@ function DashboardView({
       {/* HERO */}
       <section className="relative flex min-h-[86svh] items-end overflow-hidden sm:min-h-[88vh]">
         <div className="absolute inset-0">
-          <div className="kenburns absolute inset-0" style={fundalPoster(HERO)} />
+          <div
+            className="kenburns absolute inset-0"
+            style={fundalPoster(HERO)}
+          />
           {!HERO.poza && (
             <div className="absolute inset-0 bg-[radial-gradient(70%_70%_at_72%_28%,rgba(229,9,20,0.45),transparent_60%),radial-gradient(55%_60%_at_18%_70%,rgba(190,24,93,0.35),transparent_65%)]" />
           )}
@@ -815,7 +947,11 @@ function DashboardView({
           >
             <motion.span
               animate={{ scale: [1, 1.25, 1] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+              transition={{
+                duration: 1.8,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
             >
               <Heart className="h-4 w-4 fill-netflix" />
             </motion.span>
@@ -893,7 +1029,9 @@ function DashboardView({
         transition={{ duration: 0.8 }}
         className="border-t border-white/5 px-4 py-10 text-center text-xs text-zinc-500 sm:px-10"
       >
-        <p>ArianaFlix · Sezonul 1, Episodul 11 · Final de sezon în 30 de zile</p>
+        <p>
+          ArianaFlix · Sezonul 1, Episodul 11 · Final de sezon în 30 de zile
+        </p>
         <p className="mt-1">Produs cu dragoste. Distribuție: tu și eu.</p>
       </motion.footer>
     </motion.div>
@@ -937,7 +1075,11 @@ function DetailModal({
         className="my-auto w-full max-w-2xl overflow-hidden rounded-lg bg-cinema-soft shadow-[0_30px_90px_rgba(0,0,0,0.9)]"
       >
         <div className="relative">
-          <Poster film={film} className="aspect-video w-full" marimeEmoji="text-7xl" />
+          <Poster
+            film={film}
+            className="aspect-video w-full"
+            marimeEmoji="text-7xl"
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-soft via-transparent to-transparent" />
           <motion.button
             aria-label="Închide"
@@ -1031,7 +1173,7 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
   const pas = putinaMiscare ? 0.35 : 1.5;
 
   useEffect(() => {
-    // butonul "Redă" e un gest al utilizatorului, deci play() ar trebui sa treaca;
+    // "Redă" a fost un gest al utilizatorului, deci play() ar trebui sa treaca;
     // daca browserul refuza totusi, lasam butonul de sunet sa porneasca manual.
     audio.current?.play().catch(() => setOprit(true));
   }, []);
@@ -1113,7 +1255,11 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
         onClick={comutaSunet}
         className="fixed right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 backdrop-blur-md hover:bg-white/20 hover:text-white sm:right-8 sm:top-8"
       >
-        {oprit ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+        {oprit ? (
+          <VolumeX className="h-4 w-4" />
+        ) : (
+          <Volume2 className="h-4 w-4" />
+        )}
       </motion.button>
 
       {/* scrisoarea */}
@@ -1136,7 +1282,11 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
         >
           <motion.span
             animate={{ scale: [1, 1.15, 1] }}
-            transition={{ duration: 1.4, repeat: Infinity, ease: "easeInOut" }}
+            transition={{
+              duration: 1.4,
+              repeat: Infinity,
+              ease: "easeInOut",
+            }}
             className="text-4xl"
           >
             ❤️
@@ -1179,7 +1329,9 @@ export default function ArianaFlix() {
   return (
     <main className="relative min-h-dvh bg-cinema">
       <AnimatePresence mode="wait">
-        {ecran === "splash" && <SplashView key="splash" onFinish={laProfiles} />}
+        {ecran === "splash" && (
+          <SplashView key="splash" onFinish={laProfiles} />
+        )}
         {ecran === "profiles" && (
           <ProfilesView key="profiles" onAriana={laDashboard} />
         )}

@@ -1,4 +1,5 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
   <rect width="64" height="64" rx="12" fill="#141414" />
-  <path d="M32 10 45 54h-9.2l-2.4-8.6h-9.8L21.2 54H12L25 10h7Zm-1.6 12.6-3.6 15h7.2l-3.6-15Z" fill="#e50914" />
+  <!-- conturul are latimea 33 (x: 12..45), deci il mutam cu 3.5 ca sa fie exact pe centru -->
+  <path transform="translate(3.5 0)" d="M32 10 45 54h-9.2l-2.4-8.6h-9.8L21.2 54H12L25 10h7Zm-1.6 12.6-3.6 15h7.2l-3.6-15Z" fill="#e50914" />
 </svg>
