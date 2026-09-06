@@ -242,8 +242,13 @@ const SCRISOARE: string[] = [
   "La mulți ani de 11 luni, iubirea mea. Te iubesc.",
 ];
 
-/** Pune melodia voastra in /public/muzica/ si schimba numele aici. */
+/**
+ * Melodia care se aude sub scrisoare. Pune fisierul in /public/muzica/
+ * cu exact numele asta (mp3 sau m4a — ogg/opus nu merg pe iPhone).
+ * Porneste cand se apasa "Redă", urca lin la VOLUM si merge in bucla.
+ */
 const MUZICA = "/muzica/melodia-noastra.mp3";
+const VOLUM = 0.7;
 
 /** Intro-ul Netflix, rulat la deschiderea aplicatiei. */
 const INTRO = "/video/intro.mp4";
@@ -1173,9 +1178,30 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
   const pas = putinaMiscare ? 0.35 : 1.5;
 
   useEffect(() => {
+    const el = audio.current;
+    if (!el) return;
+    let anulat = false;
+
     // "Redă" a fost un gest al utilizatorului, deci play() ar trebui sa treaca;
     // daca browserul refuza totusi, lasam butonul de sunet sa porneasca manual.
-    audio.current?.play().catch(() => setOprit(true));
+    el.volume = 0;
+    el.play()
+      .then(() => {
+        // urcam volumul lin in 3 secunde, ca melodia sa nu intre brusc peste text
+        const start = performance.now();
+        const urca = (acum: number) => {
+          if (anulat) return;
+          const k = Math.min(1, (acum - start) / 3000);
+          el.volume = VOLUM * k;
+          if (k < 1) requestAnimationFrame(urca);
+        };
+        requestAnimationFrame(urca);
+      })
+      .catch(() => setOprit(true));
+
+    return () => {
+      anulat = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -1188,6 +1214,7 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
     const el = audio.current;
     if (!el) return;
     if (el.paused) {
+      el.volume = VOLUM;
       el.play().catch(() => undefined);
       setOprit(false);
     } else {
