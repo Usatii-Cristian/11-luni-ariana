@@ -32,7 +32,7 @@ body {
   }
 }
 
-/* Slow cinematic drift for the hero / player backdrops */
+/* Drift lent, cinematic, pe fundalurile mari. Doar transform => compozitat pe GPU. */
 @keyframes kenburns {
   0% {
     transform: scale(1) translate3d(0, 0, 0);
@@ -44,10 +44,73 @@ body {
 
 .kenburns {
   animation: kenburns 28s ease-in-out infinite alternate;
+  will-change: transform;
+  backface-visibility: hidden;
+}
+
+/*
+  Titlul din hero: gradientul e taiat pe text, iar o banda alba il traverseaza
+  o singura data la intrare. Jumatatea stanga a gradientului (pozitia 0%) e
+  exact aspectul de repaus, deci dupa sweep nu mai repictam nimic.
+*/
+.titlu-lucios {
+  background-image: linear-gradient(
+    135deg,
+    #ffffff 0%,
+    #ffd9de 22%,
+    #e50914 50%,
+    #ffffff 62%,
+    #e50914 78%,
+    #7a0d16 100%
+  );
+  background-size: 200% 100%;
+  background-position: 0% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: lucire 2.4s cubic-bezier(0.22, 1, 0.36, 1) 0.85s 1 both;
+}
+
+@keyframes lucire {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
+}
+
+/* Litera din splash: o lumina trece o singura data prin interiorul ei. */
+.litera-lucioasa {
+  background-image: linear-gradient(
+    115deg,
+    #e50914 0%,
+    #e50914 40%,
+    #ff9aa2 50%,
+    #e50914 60%,
+    #e50914 100%
+  );
+  background-size: 300% 100%;
+  background-position: 0% 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: lucire-litera 1.5s ease-in-out 1.5s 1 both;
+}
+
+@keyframes lucire-litera {
+  from {
+    background-position: 120% 0;
+  }
+  to {
+    background-position: 0% 0;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .kenburns {
+  .kenburns,
+  .titlu-lucios,
+  .litera-lucioasa {
     animation: none;
   }
 }

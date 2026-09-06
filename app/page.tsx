@@ -1,9 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   Bell,
+  ChevronDown,
   ChevronLeft,
   ChevronRight,
   Heart,
@@ -258,6 +259,21 @@ const INIMI = [
    2. UTILITARE / COMPONENTE MICI
    ================================================================ */
 
+/** Arc folosit peste tot ca miscarile sa para din aceeasi familie. */
+const ARC = { type: "spring" as const, stiffness: 260, damping: 26, mass: 0.9 };
+const LIN = [0.22, 1, 0.36, 1] as const;
+const APASARE = { scale: 0.96 };
+
+/** Un rand intreg intra pe scroll; cardurile din el vin unul dupa altul. */
+const CONTAINER = {
+  ascuns: {},
+  vizibil: { transition: { staggerChildren: 0.055, delayChildren: 0.05 } },
+};
+const ELEMENT = {
+  ascuns: { opacity: 0, y: 26 },
+  vizibil: { opacity: 1, y: 0, transition: { duration: 0.55, ease: LIN } },
+};
+
 const fundalPoster = (film: Titlu) => ({
   backgroundImage: film.poza
     ? `url(${film.poza})`
@@ -307,8 +323,8 @@ function SplashView({ onFinish }: { onFinish: () => void }) {
 
   return (
     <motion.div
-      exit={{ opacity: 0, scale: 1.15, filter: "blur(12px)" }}
-      transition={{ duration: 0.9, ease: "easeInOut" }}
+      exit={{ opacity: 0, scale: 1.18 }}
+      transition={{ duration: 0.85, ease: LIN }}
       className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-cinema"
     >
       {/* halou rosu care pulseaza */}
@@ -323,26 +339,28 @@ function SplashView({ onFinish }: { onFinish: () => void }) {
         className="pointer-events-none absolute h-[70vmin] w-[70vmin] rounded-full bg-netflix blur-[80px] sm:blur-[120px]"
       />
 
-      <motion.span
-        initial={{ opacity: 0, scale: 0.55, filter: "blur(30px)" }}
-        animate={{
-          opacity: 1,
-          scale: [0.55, 1.08, 1, 1.04, 1],
-          filter: "blur(0px)",
-        }}
-        transition={{
-          opacity: { duration: 1.1, ease: "easeOut" },
-          filter: { duration: 1.3, ease: "easeOut" },
-          scale: {
-            duration: 3.1,
-            times: [0, 0.32, 0.52, 0.74, 1],
-            ease: "easeInOut",
-          },
-        }}
-        className="relative font-display text-[42vmin] leading-[0.8] text-netflix drop-shadow-[0_0_60px_rgba(229,9,20,0.55)]"
-      >
-        A
-      </motion.span>
+      <div className="relative">
+        <motion.span
+          initial={{ opacity: 0, scale: 0.55, filter: "blur(30px)" }}
+          animate={{
+            opacity: 1,
+            scale: [0.55, 1.08, 1, 1.04, 1],
+            filter: "blur(0px)",
+          }}
+          transition={{
+            opacity: { duration: 1.1, ease: "easeOut" },
+            filter: { duration: 1.3, ease: "easeOut" },
+            scale: {
+              duration: 3.1,
+              times: [0, 0.32, 0.52, 0.74, 1],
+              ease: "easeInOut",
+            },
+          }}
+          className="litera-lucioasa block font-display text-[42vmin] leading-[0.8] drop-shadow-[0_0_60px_rgba(229,9,20,0.55)]"
+        >
+          A
+        </motion.span>
+      </div>
 
       <motion.p
         initial={{ opacity: 0, y: 14 }}
@@ -355,9 +373,10 @@ function SplashView({ onFinish }: { onFinish: () => void }) {
 
       <div className="relative mt-10 h-[2px] w-40 overflow-hidden rounded-full bg-white/10 sm:w-56">
         <motion.div
-          initial={{ width: "0%" }}
-          animate={{ width: "100%" }}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: 1 }}
           transition={{ duration: 3.4, ease: "linear" }}
+          style={{ transformOrigin: "left" }}
           className="h-full bg-netflix"
         />
       </div>
@@ -380,33 +399,39 @@ function ProfilesView({ onAriana }: { onAriana: () => void }) {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.7 }}
+      initial={{ opacity: 0, scale: 0.98 }}
+      animate={{ opacity: 1, scale: 1 }}
+      // iesirea "intra" in profil, ca la Netflix
+      exit={{ opacity: 0, scale: 1.55 }}
+      transition={{ duration: 0.65, ease: LIN }}
       className="flex min-h-dvh flex-col items-center justify-center bg-cinema px-6 py-16"
     >
       <motion.h1
         initial={{ opacity: 0, y: 24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: LIN }}
         className="mb-12 text-center text-4xl font-medium tracking-tight text-white sm:text-6xl"
       >
         Cine urmărește?
       </motion.h1>
 
       <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.25, duration: 0.8, ease: "easeOut" }}
+        variants={CONTAINER}
+        initial="ascuns"
+        animate="vizibil"
+        transition={{ delayChildren: 0.25 }}
         className="flex flex-wrap items-start justify-center gap-8 sm:gap-14"
       >
         {/* Vizitator */}
-        <button
+        <motion.button
+          variants={ELEMENT}
+          whileHover={{ y: -6 }}
+          whileTap={APASARE}
+          transition={ARC}
           onClick={() => setToast(true)}
           className="group flex flex-col items-center gap-3 outline-none"
         >
-          <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-md border-2 border-transparent bg-gradient-to-br from-zinc-600 to-zinc-800 transition-all duration-200 group-hover:border-white group-focus-visible:border-white sm:h-40 sm:w-40">
+          <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-md border-2 border-transparent bg-gradient-to-br from-zinc-600 to-zinc-800 transition-colors duration-200 group-hover:border-white group-focus-visible:border-white sm:h-40 sm:w-40">
             <span className="text-5xl grayscale sm:text-7xl">👤</span>
             <div className="absolute inset-0 flex items-end justify-end p-2 opacity-0 transition-opacity group-hover:opacity-100">
               <Lock className="h-5 w-5 text-white/90" />
@@ -415,14 +440,18 @@ function ProfilesView({ onAriana }: { onAriana: () => void }) {
           <span className="text-base text-zinc-400 transition-colors group-hover:text-white sm:text-lg">
             Vizitator
           </span>
-        </button>
+        </motion.button>
 
         {/* Ariana */}
-        <button
+        <motion.button
+          variants={ELEMENT}
+          whileHover={{ y: -6 }}
+          whileTap={APASARE}
+          transition={ARC}
           onClick={onAriana}
           className="group flex flex-col items-center gap-3 outline-none"
         >
-          <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-md border-2 border-transparent bg-gradient-to-br from-netflix via-rose-600 to-rose-900 transition-all duration-200 group-hover:border-white group-focus-visible:border-white sm:h-40 sm:w-40">
+          <div className="relative flex h-28 w-28 items-center justify-center overflow-hidden rounded-md border-2 border-transparent bg-gradient-to-br from-netflix via-rose-600 to-rose-900 transition-colors duration-200 group-hover:border-white group-focus-visible:border-white sm:h-40 sm:w-40">
             <div className="absolute inset-0 bg-[radial-gradient(120%_100%_at_50%_0%,rgba(255,255,255,0.3),transparent_60%)]" />
             <span className="relative font-display text-6xl text-white/95 sm:text-8xl">
               A
@@ -438,12 +467,17 @@ function ProfilesView({ onAriana }: { onAriana: () => void }) {
           <span className="text-base text-zinc-400 transition-colors group-hover:text-white sm:text-lg">
             Ariana
           </span>
-        </button>
+        </motion.button>
       </motion.div>
 
-      <p className="mt-14 text-center text-sm text-zinc-500">
+      <motion.p
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.9, duration: 0.8 }}
+        className="mt-14 text-center text-sm text-zinc-500"
+      >
         Un singur profil are acces la sezonul acesta.
-      </p>
+      </motion.p>
 
       <AnimatePresence>
         {toast && (
@@ -451,9 +485,9 @@ function ProfilesView({ onAriana }: { onAriana: () => void }) {
             initial={{ opacity: 0, y: 40, scale: 0.95 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.97 }}
-            transition={{ duration: 0.35, ease: "easeOut" }}
+            transition={ARC}
             role="status"
-            className="fixed bottom-8 left-1/2 z-50 flex w-[calc(100%-3rem)] max-w-md -translate-x-1/2 items-start gap-3 rounded-lg border border-netflix/60 bg-cinema-soft/95 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur"
+            className="fixed bottom-8 left-1/2 z-50 flex w-[calc(100%-3rem)] max-w-md -translate-x-1/2 items-start gap-3 overflow-hidden rounded-lg border border-netflix/60 bg-cinema-soft/95 p-4 shadow-[0_20px_60px_rgba(0,0,0,0.7)]"
           >
             <div className="mt-0.5 rounded-full bg-netflix/15 p-2">
               <Lock className="h-4 w-4 text-netflix" />
@@ -466,6 +500,13 @@ function ProfilesView({ onAriana }: { onAriana: () => void }) {
                 Eroare: Doar iubita mea are acces la acest conținut exclusiv.
               </p>
             </div>
+            <motion.div
+              initial={{ scaleX: 1 }}
+              animate={{ scaleX: 0 }}
+              transition={{ duration: 3.6, ease: "linear" }}
+              style={{ transformOrigin: "left" }}
+              className="absolute inset-x-0 bottom-0 h-0.5 bg-netflix"
+            />
           </motion.div>
         )}
       </AnimatePresence>
@@ -485,6 +526,24 @@ function ContentRow({
   onSelect: (film: Titlu) => void;
 }) {
   const scroller = useRef<HTMLDivElement>(null);
+  const [capete, setCapete] = useState({ inceput: true, final: false });
+
+  // un singur calcul per cadru, indiferent cate evenimente de scroll vin
+  const verificaCapete = useCallback(() => {
+    const el = scroller.current;
+    if (!el) return;
+    setCapete({
+      inceput: el.scrollLeft < 8,
+      final: el.scrollLeft + el.clientWidth >= el.scrollWidth - 8,
+    });
+  }, []);
+
+  useEffect(() => {
+    verificaCapete();
+    const la = () => verificaCapete();
+    window.addEventListener("resize", la);
+    return () => window.removeEventListener("resize", la);
+  }, [verificaCapete]);
 
   const muta = (directie: 1 | -1) => {
     const el = scroller.current;
@@ -493,49 +552,79 @@ function ContentRow({
   };
 
   return (
-    <section className="group/row relative">
-      <h2 className="mb-2 px-4 text-lg font-semibold tracking-tight text-zinc-200 sm:px-10 sm:text-2xl">
+    <motion.section
+      variants={CONTAINER}
+      initial="ascuns"
+      whileInView="vizibil"
+      viewport={{ once: true, amount: 0.12 }}
+      className="group/row relative"
+    >
+      <motion.h2
+        variants={ELEMENT}
+        className="mb-2 px-4 text-lg font-semibold tracking-tight text-zinc-200 sm:px-10 sm:text-2xl"
+      >
         {rand.titlu}
-      </h2>
+      </motion.h2>
 
       <button
         aria-label="Înapoi"
         onClick={() => muta(-1)}
-        className="absolute left-0 top-1/2 z-20 hidden h-[60%] w-10 -translate-y-1/2 items-center justify-center bg-gradient-to-r from-black/80 to-transparent opacity-0 transition-opacity group-hover/row:opacity-100 md:flex"
+        className={`absolute left-0 top-1/2 z-20 hidden h-[60%] w-12 -translate-y-1/2 items-center justify-center bg-gradient-to-r from-black/85 to-transparent transition-opacity duration-200 md:flex ${
+          capete.inceput
+            ? "pointer-events-none opacity-0"
+            : "opacity-0 group-hover/row:opacity-100"
+        }`}
       >
-        <ChevronLeft className="h-8 w-8 text-white" />
+        <ChevronLeft className="h-8 w-8 text-white transition-transform duration-200 hover:scale-125" />
       </button>
       <button
         aria-label="Înainte"
         onClick={() => muta(1)}
-        className="absolute right-0 top-1/2 z-20 hidden h-[60%] w-10 -translate-y-1/2 items-center justify-center bg-gradient-to-l from-black/80 to-transparent opacity-0 transition-opacity group-hover/row:opacity-100 md:flex"
+        className={`absolute right-0 top-1/2 z-20 hidden h-[60%] w-12 -translate-y-1/2 items-center justify-center bg-gradient-to-l from-black/85 to-transparent transition-opacity duration-200 md:flex ${
+          capete.final
+            ? "pointer-events-none opacity-0"
+            : "opacity-0 group-hover/row:opacity-100"
+        }`}
       >
-        <ChevronRight className="h-8 w-8 text-white" />
+        <ChevronRight className="h-8 w-8 text-white transition-transform duration-200 hover:scale-125" />
       </button>
 
-      <div
+      <motion.div
         ref={scroller}
+        onScroll={verificaCapete}
         className="no-scrollbar flex snap-x snap-mandatory gap-2 overflow-x-auto scroll-smooth scroll-pl-4 px-4 py-6 sm:gap-3 sm:scroll-pl-10 sm:px-10"
       >
         {rand.filme.map((film) => (
-          <button
+          <motion.button
             key={film.id}
+            variants={ELEMENT}
+            whileHover={{ scale: 1.06, y: -4 }}
+            whileTap={APASARE}
+            transition={ARC}
             onClick={() => onSelect(film)}
-            className="group/card relative w-[62vw] shrink-0 snap-start text-left transition-transform duration-300 hover:z-10 hover:scale-105 focus-visible:z-10 focus-visible:scale-105 sm:w-[38vw] md:w-[28vw] lg:w-[21vw] xl:w-[17vw]"
+            className="group/card relative w-[62vw] shrink-0 snap-start text-left hover:z-10 focus-visible:z-10 sm:w-[38vw] md:w-[28vw] lg:w-[21vw] xl:w-[17vw]"
           >
             <Poster
               film={film}
-              className="aspect-video rounded-md ring-1 ring-white/10 transition-shadow duration-300 group-hover/card:shadow-[0_20px_50px_rgba(0,0,0,0.75)] group-hover/card:ring-white/40"
+              className="aspect-video rounded-md ring-1 ring-white/10 transition-[box-shadow,--tw-ring-color] duration-300 group-hover/card:shadow-[0_18px_45px_rgba(0,0,0,0.7)] group-hover/card:ring-white/40"
             />
+
+            {/* butonul de play apare la hover, doar pe desktop */}
+            <div className="pointer-events-none absolute inset-0 hidden items-center justify-center opacity-0 transition-opacity duration-300 group-hover/card:opacity-100 md:flex">
+              <span className="rounded-full bg-white/90 p-3 shadow-lg">
+                <Play className="h-5 w-5 fill-black text-black" />
+              </span>
+            </div>
+
             <div className="pointer-events-none absolute inset-x-0 bottom-0 rounded-b-md bg-gradient-to-t from-black/85 to-transparent p-3 pt-8 transition-all duration-300 md:translate-y-1 md:bg-none md:opacity-0 md:group-hover/card:translate-y-0 md:group-hover/card:opacity-100 md:group-focus-visible/card:opacity-100">
               <p className="text-sm font-semibold leading-snug text-white drop-shadow-md sm:text-base">
                 {film.nume}
               </p>
             </div>
-          </button>
+          </motion.button>
         ))}
-      </div>
-    </section>
+      </motion.div>
+    </motion.section>
   );
 }
 
@@ -553,32 +642,46 @@ function DashboardView({
   const [scrolat, setScrolat] = useState(false);
 
   useEffect(() => {
-    const la = () => setScrolat(window.scrollY > 24);
+    let cadru = 0;
+    const la = () => {
+      if (cadru) return;
+      cadru = requestAnimationFrame(() => {
+        cadru = 0;
+        setScrolat(window.scrollY > 24);
+      });
+    };
     la();
     window.addEventListener("scroll", la, { passive: true });
-    return () => window.removeEventListener("scroll", la);
+    return () => {
+      window.removeEventListener("scroll", la);
+      if (cadru) cancelAnimationFrame(cadru);
+    };
   }, []);
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ opacity: 0, scale: 1.04 }}
+      animate={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.8, ease: LIN }}
       className="min-h-dvh bg-cinema"
     >
-      {/* NAVBAR */}
+      {/* NAVBAR — fundal opac cand se deruleaza, fara backdrop-blur (costa scump pe telefon) */}
       <header
         className={`fixed inset-x-0 top-0 z-40 flex items-center justify-between px-4 py-3 transition-colors duration-300 sm:px-10 ${
           scrolat
-            ? "bg-cinema/95 backdrop-blur"
+            ? "bg-cinema shadow-lg shadow-black/50"
             : "bg-gradient-to-b from-black/80 to-transparent"
         }`}
       >
         <div className="flex items-center gap-6">
-          <span className="font-display text-2xl tracking-wide text-netflix sm:text-3xl">
+          <motion.span
+            whileHover={{ scale: 1.05 }}
+            transition={ARC}
+            className="cursor-default font-display text-2xl tracking-wide text-netflix sm:text-3xl"
+          >
             ARIANAFLIX
-          </span>
+          </motion.span>
           <nav className="hidden gap-5 text-sm text-zinc-300 md:flex">
             <span className="cursor-default text-white">Acasă</span>
             <span className="cursor-default transition-colors hover:text-white">
@@ -617,17 +720,23 @@ function DashboardView({
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2, duration: 0.7 }}
+            transition={{ delay: 0.2, duration: 0.7, ease: LIN }}
             className="mb-3 flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.3em] text-netflix sm:text-sm"
           >
-            <Heart className="h-4 w-4 fill-netflix" /> Serial original
+            <motion.span
+              animate={{ scale: [1, 1.25, 1] }}
+              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Heart className="h-4 w-4 fill-netflix" />
+            </motion.span>
+            Serial original
           </motion.p>
 
           <motion.h1
-            initial={{ opacity: 0, y: 28 }}
+            initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.35, duration: 0.9, ease: "easeOut" }}
-            className="max-w-4xl bg-gradient-to-br from-white via-rose-100 to-netflix bg-clip-text font-display text-5xl leading-[0.95] tracking-wide text-transparent drop-shadow-[0_6px_30px_rgba(0,0,0,0.8)] sm:text-7xl lg:text-8xl"
+            transition={{ delay: 0.35, duration: 0.95, ease: LIN }}
+            className="titlu-lucios max-w-4xl font-display text-5xl leading-[0.95] tracking-wide drop-shadow-[0_6px_30px_rgba(0,0,0,0.8)] sm:text-7xl lg:text-8xl"
           >
             11 Luni: Dragoste fără sfârșit
           </motion.h1>
@@ -635,7 +744,7 @@ function DashboardView({
           <motion.p
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5, duration: 0.9 }}
+            transition={{ delay: 0.52, duration: 0.9, ease: LIN }}
             className="mt-5 max-w-xl text-sm leading-relaxed text-white/90 sm:text-lg"
           >
             {HERO.descriere}
@@ -644,23 +753,40 @@ function DashboardView({
           <motion.div
             initial={{ opacity: 0, y: 22 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.65, duration: 0.8 }}
+            transition={{ delay: 0.68, duration: 0.8, ease: LIN }}
             className="mt-8 flex flex-wrap gap-3"
           >
-            <button
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={APASARE}
+              transition={ARC}
               onClick={onPlay}
-              className="flex items-center gap-2 rounded bg-white px-6 py-3 font-semibold text-black transition-colors hover:bg-white/80 sm:px-8 sm:text-lg"
+              className="flex min-h-12 items-center gap-2 rounded bg-white px-6 py-3 font-semibold text-black transition-colors hover:bg-white/85 sm:px-8 sm:text-lg"
             >
               <Play className="h-5 w-5 fill-black" /> Redă
-            </button>
-            <button
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.04 }}
+              whileTap={APASARE}
+              transition={ARC}
               onClick={() => onSelect(HERO)}
-              className="flex items-center gap-2 rounded bg-zinc-500/60 px-6 py-3 font-semibold text-white backdrop-blur transition-colors hover:bg-zinc-500/40 sm:px-8 sm:text-lg"
+              className="flex min-h-12 items-center gap-2 rounded bg-zinc-500/60 px-6 py-3 font-semibold text-white transition-colors hover:bg-zinc-500/45 sm:px-8 sm:text-lg"
             >
               <Info className="h-5 w-5" /> Mai multe
-            </button>
+            </motion.button>
           </motion.div>
         </div>
+
+        {/* indiciu discret ca mai e continut dedesubt */}
+        <motion.div
+          aria-hidden
+          initial={{ opacity: 0 }}
+          animate={{ opacity: [0, 0.7, 0], y: [0, 10, 0] }}
+          transition={{ delay: 1.6, duration: 2.4, repeat: Infinity }}
+          className="absolute inset-x-0 bottom-6 hidden justify-center sm:flex"
+        >
+          <ChevronDown className="h-6 w-6 text-white/70" />
+        </motion.div>
       </section>
 
       {/* RANDURI */}
@@ -670,10 +796,16 @@ function DashboardView({
         ))}
       </div>
 
-      <footer className="border-t border-white/5 px-4 py-10 text-center text-xs text-zinc-500 sm:px-10">
+      <motion.footer
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.8 }}
+        className="border-t border-white/5 px-4 py-10 text-center text-xs text-zinc-500 sm:px-10"
+      >
         <p>ArianaFlix · Sezonul 1, Episodul 11</p>
         <p className="mt-1">Produs cu dragoste. Distribuție: tu și eu.</p>
-      </footer>
+      </motion.footer>
     </motion.div>
   );
 }
@@ -702,48 +834,59 @@ function DetailModal({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
+      transition={{ duration: 0.25 }}
       onClick={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 p-4 backdrop-blur-sm"
+      className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-black/80 p-4"
     >
       <motion.div
-        initial={{ opacity: 0, y: 40, scale: 0.94 }}
+        initial={{ opacity: 0, y: 48, scale: 0.93 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 20, scale: 0.96 }}
-        transition={{ duration: 0.4, ease: "easeOut" }}
+        exit={{ opacity: 0, y: 24, scale: 0.96, transition: { duration: 0.2 } }}
+        transition={ARC}
         onClick={(e) => e.stopPropagation()}
         className="my-auto w-full max-w-2xl overflow-hidden rounded-lg bg-cinema-soft shadow-[0_30px_90px_rgba(0,0,0,0.9)]"
       >
         <div className="relative">
           <Poster film={film} className="aspect-video w-full" marimeEmoji="text-7xl" />
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-soft via-transparent to-transparent" />
-          <button
+          <motion.button
             aria-label="Închide"
+            whileHover={{ scale: 1.1, rotate: 90 }}
+            whileTap={APASARE}
+            transition={ARC}
             onClick={onClose}
-            className="absolute right-3 top-3 rounded-full bg-black/70 p-2 text-white transition-colors hover:bg-black"
+            className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full bg-black/70 text-white"
           >
             <X className="h-5 w-5" />
-          </button>
+          </motion.button>
         </div>
-        <div className="p-6 sm:p-8">
+        <motion.div
+          initial={{ opacity: 0, y: 14 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.14, duration: 0.5, ease: LIN }}
+          className="p-6 sm:p-8"
+        >
           <h3 className="text-2xl font-semibold text-white sm:text-3xl">
             {film.nume}
           </h3>
           <p className="mt-3 leading-relaxed text-zinc-300">{film.descriere}</p>
           <div className="mt-6 flex flex-wrap items-center gap-4">
             {onPlay && (
-              <button
+              <motion.button
+                whileHover={{ scale: 1.04 }}
+                whileTap={APASARE}
+                transition={ARC}
                 onClick={onPlay}
-                className="flex items-center gap-2 rounded bg-white px-5 py-2.5 font-semibold text-black transition-colors hover:bg-white/80"
+                className="flex min-h-11 items-center gap-2 rounded bg-white px-5 py-2.5 font-semibold text-black transition-colors hover:bg-white/85"
               >
                 <Play className="h-4 w-4 fill-black" /> Redă
-              </button>
+              </motion.button>
             )}
             <span className="text-xs uppercase tracking-widest text-zinc-500">
               ArianaFlix Original
             </span>
           </div>
-        </div>
+        </motion.div>
       </motion.div>
     </motion.div>
   );
@@ -754,7 +897,15 @@ function DetailModal({
    ================================================================ */
 
 /** Un paragraf al scrisorii: apare lent si, daca a ramas sub ecran, se aduce singur in vizor. */
-function Paragraf({ text, index }: { text: string; index: number }) {
+function Paragraf({
+  text,
+  index,
+  pas,
+}: {
+  text: string;
+  index: number;
+  pas: number;
+}) {
   const el = useRef<HTMLParagraphElement>(null);
 
   const aduInVizor = () => {
@@ -770,7 +921,7 @@ function Paragraf({ text, index }: { text: string; index: number }) {
       ref={el}
       initial={{ opacity: 0, y: 22, filter: "blur(6px)" }}
       animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-      transition={{ delay: 1 + index * 1.6, duration: 2.2, ease: "easeOut" }}
+      transition={{ delay: 1 + index * pas, duration: 2.2, ease: "easeOut" }}
       onAnimationComplete={aduInVizor}
       className={
         index === 0
@@ -786,6 +937,8 @@ function Paragraf({ text, index }: { text: string; index: number }) {
 function PlayerModal({ onClose }: { onClose: () => void }) {
   const audio = useRef<HTMLAudioElement>(null);
   const [oprit, setOprit] = useState(false);
+  const putinaMiscare = useReducedMotion();
+  const pas = putinaMiscare ? 0.35 : 1.6;
 
   useEffect(() => {
     // butonul "Redă" e un gest al utilizatorului, deci play() ar trebui sa treaca;
@@ -816,7 +969,7 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 1.4, ease: "easeInOut" }}
+      transition={{ duration: 1.2, ease: "easeInOut" }}
       className="fixed inset-0 z-50 overflow-y-auto bg-black"
     >
       <audio ref={audio} src={MUZICA} loop preload="auto" className="hidden" />
@@ -825,54 +978,65 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
       <div className="pointer-events-none fixed inset-0">
         <div className="kenburns absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_35%,rgba(229,9,20,0.22),transparent_65%),radial-gradient(45%_50%_at_20%_80%,rgba(190,24,93,0.18),transparent_70%)]" />
         <div className="absolute inset-0 bg-[radial-gradient(120%_120%_at_50%_50%,transparent_35%,rgba(0,0,0,0.85))]" />
-        {INIMI.map((inima, i) => (
-          <motion.span
-            key={i}
-            initial={{ opacity: 0, y: "105vh" }}
-            animate={{ opacity: [0, 0.5, 0.5, 0], y: "-15vh" }}
-            transition={{
-              duration: inima.durata,
-              delay: inima.intarziere,
-              repeat: Infinity,
-              ease: "linear",
-            }}
-            style={{ left: inima.x, fontSize: inima.marime }}
-            className="absolute bottom-0"
-          >
-            ❤️
-          </motion.span>
-        ))}
+        {!putinaMiscare &&
+          INIMI.map((inima, i) => (
+            <motion.span
+              key={i}
+              initial={{ opacity: 0, y: "105vh" }}
+              animate={{ opacity: [0, 0.5, 0.5, 0], y: "-15vh" }}
+              transition={{
+                duration: inima.durata,
+                delay: inima.intarziere,
+                repeat: Infinity,
+                ease: "linear",
+              }}
+              style={{ left: inima.x, fontSize: inima.marime }}
+              className="absolute bottom-0"
+            >
+              ❤️
+            </motion.span>
+          ))}
       </div>
 
       {/* scrim ca textul sa nu treaca pe sub butoane */}
       <div className="pointer-events-none fixed inset-x-0 top-0 z-20 h-28 bg-gradient-to-b from-black via-black/85 to-transparent" />
 
       {/* butoane */}
-      <button
+      <motion.button
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.6, duration: 0.6, ease: LIN }}
+        whileHover={{ scale: 1.04 }}
+        whileTap={APASARE}
         onClick={onClose}
-        className="fixed left-4 top-4 z-30 flex min-h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white/80 backdrop-blur-md transition-colors hover:bg-white/20 hover:text-white sm:left-8 sm:top-8"
+        className="fixed left-4 top-4 z-30 flex min-h-11 items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-2 text-sm text-white/80 backdrop-blur-md hover:bg-white/20 hover:text-white sm:left-8 sm:top-8"
       >
         <ChevronLeft className="h-4 w-4" /> Înapoi la meniu
-      </button>
-      <button
+      </motion.button>
+      <motion.button
         aria-label={oprit ? "Pornește muzica" : "Oprește muzica"}
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ delay: 0.6, duration: 0.6, ease: LIN }}
+        whileHover={{ scale: 1.08 }}
+        whileTap={APASARE}
         onClick={comutaSunet}
-        className="fixed right-4 top-4 z-30 min-h-11 min-w-11 rounded-full border border-white/15 bg-white/10 p-3 text-white/80 backdrop-blur-md transition-colors hover:bg-white/20 hover:text-white sm:right-8 sm:top-8"
+        className="fixed right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 backdrop-blur-md hover:bg-white/20 hover:text-white sm:right-8 sm:top-8"
       >
         {oprit ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
-      </button>
+      </motion.button>
 
       {/* scrisoarea */}
       <div className="relative z-10 mx-auto flex min-h-dvh max-w-3xl flex-col justify-center px-6 py-28 sm:px-10">
         {SCRISOARE.map((paragraf, i) => (
-          <Paragraf key={i} text={paragraf} index={i} />
+          <Paragraf key={i} text={paragraf} index={i} pas={pas} />
         ))}
 
         <motion.div
           id="final-scrisoare"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 1 + SCRISOARE.length * 1.6, duration: 2 }}
+          transition={{ delay: 1 + SCRISOARE.length * pas, duration: 2 }}
           onAnimationComplete={() =>
             document
               .getElementById("final-scrisoare")
@@ -908,7 +1072,10 @@ export default function ArianaFlix() {
   const [detaliu, setDetaliu] = useState<Titlu | null>(null);
 
   const laProfiles = useCallback(() => setEcran("profiles"), []);
+  const laDashboard = useCallback(() => setEcran("dashboard"), []);
   const inchidePlayer = useCallback(() => setPlayer(false), []);
+  const deschidePlayer = useCallback(() => setPlayer(true), []);
+  const inchideDetaliu = useCallback(() => setDetaliu(null), []);
 
   // blocheaza scroll-ul paginii cat timp e deschis un modal
   useEffect(() => {
@@ -924,12 +1091,12 @@ export default function ArianaFlix() {
       <AnimatePresence mode="wait">
         {ecran === "splash" && <SplashView key="splash" onFinish={laProfiles} />}
         {ecran === "profiles" && (
-          <ProfilesView key="profiles" onAriana={() => setEcran("dashboard")} />
+          <ProfilesView key="profiles" onAriana={laDashboard} />
         )}
         {ecran === "dashboard" && (
           <DashboardView
             key="dashboard"
-            onPlay={() => setPlayer(true)}
+            onPlay={deschidePlayer}
             onSelect={setDetaliu}
           />
         )}
@@ -940,7 +1107,7 @@ export default function ArianaFlix() {
           <DetailModal
             key="detaliu"
             film={detaliu}
-            onClose={() => setDetaliu(null)}
+            onClose={inchideDetaliu}
             onPlay={
               detaliu.id === "hero"
                 ? () => {
