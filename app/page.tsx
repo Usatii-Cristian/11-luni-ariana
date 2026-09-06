@@ -313,74 +313,163 @@ function Poster({
 }
 
 /* ================================================================
-   3. SPLASH SCREEN
+   3. SPLASH SCREEN — intro in stilul Netflix
    ================================================================ */
 
+/** Cele 13 bare care umplu ecranul. Valori fixe, deci nu apare hydration mismatch. */
+const NR_BARE = 13;
+const BARE = Array.from({ length: NR_BARE }, (_, i) => {
+  const distanta = Math.abs(i - (NR_BARE - 1) / 2);
+  const slot = 100 / NR_BARE;
+  return {
+    stanga: i * slot + slot * 0.17,
+    latime: slot * 0.66,
+    // inaltimi diferite, dar calculate determinist (fara Math.random)
+    inaltime: 70 + ((i * 37) % 31),
+    intrare: 0.16 + distanta * 0.05,
+    iesire: distanta * 0.035,
+    gradient: [
+      "linear-gradient(to top, #ff3d47 0%, #e50914 42%, rgba(229,9,20,0) 100%)",
+      "linear-gradient(to top, #e50914 0%, #a80710 48%, rgba(168,7,16,0) 100%)",
+      "linear-gradient(to top, #ff7a80 0%, #e50914 38%, rgba(229,9,20,0) 100%)",
+    ][i % 3],
+  };
+});
+
+/** Barele din interiorul literei, care o umplu de jos in sus. */
+const NR_BARE_LITERA = 7;
+const BARE_LITERA = Array.from({ length: NR_BARE_LITERA }, (_, i) => ({
+  x: (i * 64) / NR_BARE_LITERA,
+  latime: 64 / NR_BARE_LITERA + 0.2,
+  intarziere: 0.1 + Math.abs(i - (NR_BARE_LITERA - 1) / 2) * 0.07,
+}));
+
+/** Conturul literei A (acelasi cu cel din app/icon.svg). */
+const CONTUR_A =
+  "M32 10 45 54h-9.2l-2.4-8.6h-9.8L21.2 54H12L25 10h7Zm-1.6 12.6-3.6 15h7.2l-3.6-15Z";
+
+const bara = {
+  ascuns: { scaleY: 0, opacity: 0 },
+  deschis: (b: (typeof BARE)[number]) => ({
+    scaleY: 1,
+    opacity: 1,
+    transition: { delay: b.intrare, duration: 0.6, ease: LIN },
+  }),
+  inchis: (b: (typeof BARE)[number]) => ({
+    scaleY: 0.02,
+    opacity: 0,
+    transition: { delay: b.iesire, duration: 0.55, ease: "easeIn" as const },
+  }),
+};
+
 function SplashView({ onFinish }: { onFinish: () => void }) {
+  const putinaMiscare = useReducedMotion();
+  // 0 = perdeaua de bare, 1 = barele se strang si apare litera
+  const [faza, setFaza] = useState(putinaMiscare ? 1 : 0);
+
   useEffect(() => {
-    const t = setTimeout(onFinish, 3500);
-    return () => clearTimeout(t);
-  }, [onFinish]);
+    const total = putinaMiscare ? 1800 : 4000;
+    const t1 = setTimeout(() => setFaza(1), 1750);
+    const t2 = setTimeout(onFinish, total);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
+  }, [onFinish, putinaMiscare]);
 
   return (
     <motion.div
       exit={{ opacity: 0, scale: 1.18 }}
       transition={{ duration: 0.85, ease: LIN }}
-      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-cinema"
+      className="fixed inset-0 z-50 flex flex-col items-center justify-center overflow-hidden bg-black"
     >
-      {/* halou rosu care pulseaza */}
+      {/* perdeaua de bare verticale */}
+      {!putinaMiscare && (
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          {BARE.map((b, i) => (
+            <motion.div
+              key={i}
+              custom={b}
+              variants={bara}
+              initial="ascuns"
+              animate={faza === 0 ? "deschis" : "inchis"}
+              style={{
+                left: `${b.stanga}%`,
+                width: `${b.latime}%`,
+                height: `${b.inaltime}%`,
+                backgroundImage: b.gradient,
+                transformOrigin: "50% 100%",
+              }}
+              className="absolute bottom-0"
+            />
+          ))}
+
+          {/* lumina care traverseaza perdeaua o singura data */}
+          <motion.div
+            initial={{ x: "-40%", opacity: 0 }}
+            animate={{ x: "140%", opacity: [0, 1, 1, 0] }}
+            transition={{ delay: 0.85, duration: 0.9, ease: "easeInOut" }}
+            className="absolute inset-y-0 w-1/3 bg-gradient-to-r from-transparent via-white/70 to-transparent mix-blend-plus-lighter"
+          />
+        </div>
+      )}
+
+      {/* halou rosu care ramane in spatele literei */}
       <motion.div
         aria-hidden
-        initial={{ opacity: 0, scale: 0.5 }}
-        animate={{
-          opacity: [0, 0.55, 0.25, 0.5, 0.2],
-          scale: [0.5, 1.1, 1, 1.15, 1.3],
-        }}
-        transition={{ duration: 3.4, ease: "easeInOut" }}
+        initial={{ opacity: 0, scale: 0.6 }}
+        animate={
+          faza === 1
+            ? { opacity: [0, 0.45, 0.22], scale: [0.6, 1.15, 1.35] }
+            : {}
+        }
+        transition={{ duration: 2.2, ease: "easeOut" }}
         className="pointer-events-none absolute h-[70vmin] w-[70vmin] rounded-full bg-netflix blur-[80px] sm:blur-[120px]"
       />
 
-      <div className="relative">
-        <motion.span
-          initial={{ opacity: 0, scale: 0.55, filter: "blur(30px)" }}
-          animate={{
-            opacity: 1,
-            scale: [0.55, 1.08, 1, 1.04, 1],
-            filter: "blur(0px)",
-          }}
-          transition={{
-            opacity: { duration: 1.1, ease: "easeOut" },
-            filter: { duration: 1.3, ease: "easeOut" },
-            scale: {
-              duration: 3.1,
-              times: [0, 0.32, 0.52, 0.74, 1],
-              ease: "easeInOut",
-            },
-          }}
-          className="litera-lucioasa block font-display text-[42vmin] leading-[0.8] drop-shadow-[0_0_60px_rgba(229,9,20,0.55)]"
-        >
-          A
-        </motion.span>
-      </div>
+      {/* litera, umpluta de bare dinauntru */}
+      <motion.svg
+        viewBox="0 0 64 64"
+        initial={{ opacity: 0, scale: 0.82 }}
+        animate={faza === 1 ? { opacity: 1, scale: 1 } : { opacity: 0 }}
+        transition={{ duration: 0.75, ease: LIN }}
+        className="relative h-[60vmin] w-[60vmin] drop-shadow-[0_0_60px_rgba(229,9,20,0.55)]"
+      >
+        <defs>
+          <clipPath id="clip-litera">
+            <path d={CONTUR_A} />
+          </clipPath>
+        </defs>
+        <g clipPath="url(#clip-litera)">
+          {BARE_LITERA.map((b, i) => (
+            <motion.rect
+              key={i}
+              x={b.x}
+              y={0}
+              width={b.latime}
+              height={64}
+              fill="#e50914"
+              initial={{ scaleY: 0 }}
+              animate={faza === 1 ? { scaleY: 1 } : { scaleY: 0 }}
+              transition={{
+                delay: 0.25 + b.intarziere,
+                duration: 0.6,
+                ease: LIN,
+              }}
+              style={{ transformBox: "fill-box", transformOrigin: "50% 100%" }}
+            />
+          ))}
+        </g>
+      </motion.svg>
 
       <motion.p
         initial={{ opacity: 0, y: 14 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.6, duration: 1.2, ease: "easeOut" }}
-        className="relative mt-2 pl-[0.45em] font-display text-lg tracking-[0.45em] text-white/70 sm:text-2xl"
+        animate={faza === 1 ? { opacity: 1, y: 0 } : { opacity: 0 }}
+        transition={{ delay: 1.05, duration: 0.9, ease: "easeOut" }}
+        className="relative -mt-[6vmin] pl-[0.45em] font-display text-lg tracking-[0.45em] text-white/70 sm:text-2xl"
       >
         ARIANAFLIX
       </motion.p>
-
-      <div className="relative mt-10 h-[2px] w-40 overflow-hidden rounded-full bg-white/10 sm:w-56">
-        <motion.div
-          initial={{ scaleX: 0 }}
-          animate={{ scaleX: 1 }}
-          transition={{ duration: 3.4, ease: "linear" }}
-          style={{ transformOrigin: "left" }}
-          className="h-full bg-netflix"
-        />
-      </div>
     </motion.div>
   );
 }
