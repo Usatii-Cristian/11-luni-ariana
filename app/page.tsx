@@ -237,7 +237,8 @@ const SCRISOARE: string[] = [
   "Nu știu cum ai reușit, dar ai transformat obișnuitul în ceva ce merită povestit. Cu tine, până și o zi de marți are scenariu bun.",
   "Îmi place că ești a mea în zilele bune și că rămâi a mea în cele grele. Că nu fugi când e greu — te apropii.",
   "Îți mulțumesc pentru răbdare. Pentru grijă. Pentru fiecare „totul o să fie bine” spus exact la momentul potrivit.",
-  "Unsprezece luni sunt doar începutul. Vreau sezonul doi, și trei, și toate celelalte. Vreau toate episoadele, inclusiv pe cele plictisitoare — mai ales pe alea, pentru că le trăiesc cu tine.",
+  "Am trecut deja episodul opt, apoi nouă, apoi zece. Fiecare lună a fost alt episod și niciunul nu a semănat cu celălalt. Acum suntem la unsprezece — și tot nu m-am săturat de niciunul.",
+  "Peste o lună vine episodul doisprezece: finalul primului sezon, un an întreg de noi doi. Și am o presimțire că ăla o să fie ceva de neuitat. Până atunci mai avem treizeci de zile de scris împreună — și pe alea le vreau pe toate, inclusiv pe cele plictisitoare, pentru că le trăiesc cu tine.",
   "La mulți ani de 11 luni, iubirea mea. Te iubesc.",
 ];
 
@@ -803,7 +804,7 @@ function DashboardView({
         transition={{ duration: 0.8 }}
         className="border-t border-white/5 px-4 py-10 text-center text-xs text-zinc-500 sm:px-10"
       >
-        <p>ArianaFlix · Sezonul 1, Episodul 11</p>
+        <p>ArianaFlix · Sezonul 1, Episodul 11 · Final de sezon în 30 de zile</p>
         <p className="mt-1">Produs cu dragoste. Distribuție: tu și eu.</p>
       </motion.footer>
     </motion.div>
@@ -938,7 +939,7 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
   const audio = useRef<HTMLAudioElement>(null);
   const [oprit, setOprit] = useState(false);
   const putinaMiscare = useReducedMotion();
-  const pas = putinaMiscare ? 0.35 : 1.6;
+  const pas = putinaMiscare ? 0.35 : 1.5;
 
   useEffect(() => {
     // butonul "Redă" e un gest al utilizatorului, deci play() ar trebui sa treaca;
