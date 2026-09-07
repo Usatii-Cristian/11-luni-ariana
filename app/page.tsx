@@ -242,11 +242,11 @@ const RANDURI: Rand[] = [
       {
         id: "f6",
         poza: "/poze/f6.jpg",
-        nume: "Glumele mele proaste, râse oricum",
-        emoji: "🤡",
+        nume: "Final de sezon unu, început de doi",
+        emoji: "🎬",
         culori: ["#15803d", "#062713"],
         descriere:
-          "Nu sunt amuzant. Tu doar ești bună la suflet. Și pentru asta o să-ți mulțumesc toată viața.",
+          "Aici se închide primul sezon. Aceiași doi oameni, aceleași fețe caraghioase — doar că de luna viitoare avem un an întreg în spate. Iar sezonul doi abia se scrie.",
       },
     ],
   },
