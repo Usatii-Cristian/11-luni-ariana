@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
-  Bell,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
@@ -29,6 +29,8 @@ type Titlu = {
   descriere: string;
   /** Optional: pune o poza in /public/poze si scrie aici "/poze/fisier.jpg" */
   poza?: string;
+  /** object-position, cand centrul pozei nu e si subiectul ei */
+  focus?: string;
 };
 
 type Rand = {
@@ -44,7 +46,9 @@ const HERO: Titlu = {
   culori: ["#7a0d16", "#2a0a10"],
   descriere:
     "Unsprezece luni. Peste trei sute de zile în care ai transformat obișnuitul în ceva ce merită povestit. Un sezon întreg scris de noi doi: nopți la tabără, zile de școală, situații grele și situații ușoare prin care am trecut ținându-ne unul de altul. Și un singur personaj principal: tu.",
-  // poza: "/poze/hero.jpg",
+  // poza verticala, cu fetele sus si loc gol jos, unde vine textul
+  poza: "/poze/a4.jpg",
+  focus: "center 18%",
 };
 
 const RANDURI: Rand[] = [
@@ -54,6 +58,7 @@ const RANDURI: Rand[] = [
     filme: [
       {
         id: "a1",
+        poza: "/poze/a1.jpg",
         nume: "Prima dată când te-am văzut",
         emoji: "🌙",
         culori: ["#4c1d95", "#1e1b4b"],
@@ -62,6 +67,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "a2",
+        poza: "/poze/a2.jpg",
         nume: "Primul nostru mesaj",
         emoji: "💬",
         culori: ["#0f766e", "#062f2b"],
@@ -70,6 +76,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "a3",
+        poza: "/poze/a3.jpg",
         nume: "Prima îmbrățișare",
         emoji: "🤍",
         culori: ["#9d174d", "#3b0a24"],
@@ -78,6 +85,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "a4",
+        poza: "/poze/a4.jpg",
         nume: "Nopțile de la tabără",
         emoji: "🏕️",
         culori: ["#1e3a8a", "#0b1533"],
@@ -86,6 +94,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "a5",
+        poza: "/poze/a5.jpg",
         nume: "Zilele de școală, unul lângă altul",
         emoji: "🎒",
         culori: ["#b45309", "#3b1d05"],
@@ -94,6 +103,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "a6",
+        poza: "/poze/a6.jpg",
         nume: "Ziua în care am știut că ești tu",
         emoji: "✨",
         culori: ["#be123c", "#40060f"],
@@ -108,6 +118,7 @@ const RANDURI: Rand[] = [
     filme: [
       {
         id: "m1",
+        poza: "/poze/m1.jpg",
         nume: "Râsul tău",
         emoji: "😊",
         culori: ["#e50914", "#4a0209"],
@@ -116,6 +127,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "m2",
+        poza: "/poze/m2.jpg",
         nume: "Felul în care mă asculți",
         emoji: "🎧",
         culori: ["#065f46", "#04241b"],
@@ -124,6 +136,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "m3",
+        poza: "/poze/m3.jpg",
         nume: "Bunătatea ta",
         emoji: "🌷",
         culori: ["#db2777", "#420a26"],
@@ -132,6 +145,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "m4",
+        poza: "/poze/m4.jpg",
         nume: "Ochii tăi",
         emoji: "🤎",
         culori: ["#78350f", "#2a1204"],
@@ -140,6 +154,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "m5",
+        poza: "/poze/m5.jpg",
         nume: "Cum mă faci să mă simt acasă",
         emoji: "🏡",
         culori: ["#c2410c", "#3d1204"],
@@ -148,6 +163,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "m6",
+        poza: "/poze/m6.jpg",
         nume: "Curajul tău",
         emoji: "🔥",
         culori: ["#a21caf", "#360b3a"],
@@ -156,6 +172,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "m7",
+        poza: "/poze/m7.jpg",
         nume: "Că trecem peste orice, împreună",
         emoji: "🤝",
         culori: ["#1d4ed8", "#0a1633"],
@@ -164,6 +181,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "m8",
+        poza: "/poze/m8.jpg",
         nume: "Obiceiurile tale mici",
         emoji: "☕",
         culori: ["#3f3f46", "#161618"],
@@ -178,6 +196,7 @@ const RANDURI: Rand[] = [
     filme: [
       {
         id: "f1",
+        poza: "/poze/f1.jpg",
         nume: "Cearta despre ce film vedem",
         emoji: "🍿",
         culori: ["#e50914", "#3a060b"],
@@ -186,6 +205,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "f2",
+        poza: "/poze/f2.jpg",
         nume: "Dansul tău când crezi că nu te văd",
         emoji: "💃",
         culori: ["#7c3aed", "#26104d"],
@@ -194,6 +214,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "f3",
+        poza: "/poze/f3.jpg",
         nume: "Mesajele scrise greșit la 3 dimineața",
         emoji: "📱",
         culori: ["#0369a1", "#04202f"],
@@ -202,6 +223,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "f4",
+        poza: "/poze/f4.jpg",
         nume: "Când ai adormit în mijlocul filmului",
         emoji: "😴",
         culori: ["#1e293b", "#0a0f19"],
@@ -210,6 +232,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "f5",
+        poza: "/poze/f5.jpg",
         nume: "Selfie-urile ratate",
         emoji: "📸",
         culori: ["#ca8a04", "#3a2803"],
@@ -218,6 +241,7 @@ const RANDURI: Rand[] = [
       },
       {
         id: "f6",
+        poza: "/poze/f6.jpg",
         nume: "Glumele mele proaste, râse oricum",
         emoji: "🤡",
         culori: ["#15803d", "#062713"],
@@ -248,10 +272,15 @@ const SCRISOARE: string[] = [
  * Porneste cand se apasa "Redă", urca lin la VOLUM si merge in bucla.
  */
 const MUZICA = "/muzica/melodia-noastra.mp3";
-const VOLUM = 0.7;
+/** incet, cat sa se simta in fundal fara sa deranjeze */
+const VOLUM_FUNDAL = 0.22;
+/** mai tare sub scrisoare, acolo e momentul */
+const VOLUM_SCRISOARE = 0.62;
 
 /** Intro-ul Netflix, rulat la deschiderea aplicatiei. */
 const INTRO = "/video/intro.mp4";
+/** Filmuletul cu voi doi, rulat mut si in bucla in spatele hero-ului. */
+const VIDEO_HERO = "/video/noi.mp4";
 
 /** Pozitii fixe (nu random) ca sa nu apara hydration mismatch. */
 const INIMI = [
@@ -291,21 +320,79 @@ const fundalPoster = (film: Titlu) => ({
   backgroundPosition: "center",
 });
 
+/**
+ * Filmuletul din spatele hero-ului. Intai se vede poza (clara, se incarca instant),
+ * apoi videoul intra lin peste ea si merge in bucla — ca la Netflix, unde intai
+ * vezi afisul si abia dupa porneste trailerul.
+ *
+ * Doar pe telefon: clipul e 464x848, deci pe un ecran lat ar fi marit de trei ori
+ * si taiat pe verticala. Acolo ramane poza.
+ */
+function VideoFundal() {
+  const el = useRef<HTMLVideoElement>(null);
+  const [poateRula, setPoateRula] = useState(false);
+  const [aTrecutPoza, setATrecutPoza] = useState(false);
+  const [eroare, setEroare] = useState(false);
+  const putinaMiscare = useReducedMotion();
+
+  useEffect(() => {
+    // unele browsere pornesc autoplay-ul doar daca "muted" e setat ca proprietate
+    if (el.current) el.current.muted = true;
+    const t = setTimeout(() => setATrecutPoza(true), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
+  if (eroare || putinaMiscare) return null;
+
+  return (
+    <video
+      ref={el}
+      src={VIDEO_HERO}
+      aria-hidden
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      disablePictureInPicture
+      onCanPlay={() => setPoateRula(true)}
+      onError={() => setEroare(true)}
+      className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-700 sm:hidden ${
+        poateRula && aTrecutPoza ? "opacity-100" : "opacity-0"
+      }`}
+    />
+  );
+}
+
 function Poster({
   film,
   className = "",
   marimeEmoji = "text-5xl",
+  sizes = "50vw",
+  prioritate = false,
 }: {
   film: Titlu;
   className?: string;
   marimeEmoji?: string;
+  sizes?: string;
+  prioritate?: boolean;
 }) {
   return (
     <div
       className={`relative overflow-hidden bg-cinema-soft ${className}`}
-      style={fundalPoster(film)}
+      style={film.poza ? undefined : fundalPoster(film)}
     >
-      {!film.poza && (
+      {film.poza ? (
+        <Image
+          src={film.poza}
+          alt={film.nume}
+          fill
+          sizes={sizes}
+          priority={prioritate}
+          className="object-cover"
+          style={{ objectPosition: film.focus ?? "center" }}
+        />
+      ) : (
         <>
           <div className="absolute inset-0 bg-[radial-gradient(120%_90%_at_50%_0%,rgba(255,255,255,0.18),transparent_60%)]" />
           <div className="absolute inset-0 flex items-center justify-center">
@@ -826,11 +913,12 @@ function ContentRow({
             whileTap={APASARE}
             transition={ARC}
             onClick={() => onSelect(film)}
-            className="group/card relative w-[62vw] shrink-0 snap-start text-left hover:z-10 focus-visible:z-10 sm:w-[38vw] md:w-[28vw] lg:w-[21vw] xl:w-[17vw]"
+            className="group/card relative w-[42vw] shrink-0 snap-start text-left hover:z-10 focus-visible:z-10 sm:w-[30vw] md:w-[23vw] lg:w-[17vw] xl:w-[14vw]"
           >
             <Poster
               film={film}
-              className="aspect-video rounded-md ring-1 ring-white/10 transition-[box-shadow,--tw-ring-color] duration-300 group-hover/card:shadow-[0_18px_45px_rgba(0,0,0,0.7)] group-hover/card:ring-white/40"
+              sizes="(max-width: 640px) 42vw, (max-width: 768px) 30vw, (max-width: 1024px) 23vw, 17vw"
+              className="aspect-[3/4] rounded-md ring-1 ring-white/10 transition-[box-shadow,--tw-ring-color] duration-300 group-hover/card:shadow-[0_18px_45px_rgba(0,0,0,0.7)] group-hover/card:ring-white/40"
             />
 
             {/* butonul de play apare la hover, doar pe desktop */}
@@ -859,9 +947,13 @@ function ContentRow({
 function DashboardView({
   onPlay,
   onSelect,
+  canta,
+  comutaSunet,
 }: {
   onPlay: () => void;
   onSelect: (film: Titlu) => void;
+  canta: boolean;
+  comutaSunet: () => void;
 }) {
   const [scrolat, setScrolat] = useState(false);
 
@@ -921,7 +1013,17 @@ function DashboardView({
         </div>
         <div className="flex items-center gap-4 text-zinc-200">
           <Search className="h-5 w-5" />
-          <Bell className="h-5 w-5" />
+          <button
+            aria-label={canta ? "Oprește muzica" : "Pornește muzica"}
+            onClick={comutaSunet}
+            className="flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-white/10"
+          >
+            {canta ? (
+              <Volume2 className="h-5 w-5" />
+            ) : (
+              <VolumeX className="h-5 w-5" />
+            )}
+          </button>
           <div className="flex h-8 w-8 items-center justify-center rounded bg-gradient-to-br from-netflix to-rose-900 font-display text-lg leading-none text-white">
             A
           </div>
@@ -931,13 +1033,25 @@ function DashboardView({
       {/* HERO */}
       <section className="relative flex min-h-[86svh] items-end overflow-hidden sm:min-h-[88vh]">
         <div className="absolute inset-0">
-          <div
-            className="kenburns absolute inset-0"
-            style={fundalPoster(HERO)}
-          />
+          <div className="kenburns absolute inset-0">
+            {HERO.poza ? (
+              <Image
+                src={HERO.poza}
+                alt={HERO.nume}
+                fill
+                priority
+                sizes="100vw"
+                className="object-cover"
+                style={{ objectPosition: HERO.focus ?? "center" }}
+              />
+            ) : (
+              <div className="absolute inset-0" style={fundalPoster(HERO)} />
+            )}
+          </div>
           {!HERO.poza && (
             <div className="absolute inset-0 bg-[radial-gradient(70%_70%_at_72%_28%,rgba(229,9,20,0.45),transparent_60%),radial-gradient(55%_60%_at_18%_70%,rgba(190,24,93,0.35),transparent_65%)]" />
           )}
+          <VideoFundal />
           {/* gradientul obligatoriu, de jos in sus */}
           <div className="absolute inset-0 bg-gradient-to-t from-[#141414] via-[#141414]/60 to-transparent" />
           <div className="absolute inset-0 bg-gradient-to-r from-[#141414] via-[#141414]/40 to-transparent" />
@@ -976,7 +1090,7 @@ function DashboardView({
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.52, duration: 0.9, ease: LIN }}
-            className="mt-5 max-w-xl text-sm leading-relaxed text-white/90 sm:text-lg"
+            className="mt-5 line-clamp-3 max-w-xl text-sm leading-relaxed text-white/90 sm:line-clamp-none sm:text-lg"
           >
             {HERO.descriere}
           </motion.p>
@@ -1080,11 +1194,32 @@ function DetailModal({
         className="my-auto w-full max-w-2xl overflow-hidden rounded-lg bg-cinema-soft shadow-[0_30px_90px_rgba(0,0,0,0.9)]"
       >
         <div className="relative">
-          <Poster
-            film={film}
-            className="aspect-video w-full"
-            marimeEmoji="text-7xl"
-          />
+          {film.poza ? (
+            <div className="relative aspect-[4/3] w-full overflow-hidden bg-black">
+              {/* aceeasi poza, neclara, ca sa umple laturile fara sa taie nimic */}
+              <Image
+                src={film.poza}
+                alt=""
+                aria-hidden
+                fill
+                sizes="(max-width: 768px) 100vw, 672px"
+                className="scale-110 object-cover blur-2xl brightness-50"
+              />
+              <Image
+                src={film.poza}
+                alt={film.nume}
+                fill
+                sizes="(max-width: 768px) 100vw, 672px"
+                className="object-contain"
+              />
+            </div>
+          ) : (
+            <Poster
+              film={film}
+              className="aspect-video w-full"
+              marimeEmoji="text-7xl"
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-cinema-soft via-transparent to-transparent" />
           <motion.button
             aria-label="Închide"
@@ -1171,57 +1306,23 @@ function Paragraf({
   );
 }
 
-function PlayerModal({ onClose }: { onClose: () => void }) {
-  const audio = useRef<HTMLAudioElement>(null);
-  const [oprit, setOprit] = useState(false);
+function PlayerModal({
+  onClose,
+  canta,
+  comutaSunet,
+}: {
+  onClose: () => void;
+  canta: boolean;
+  comutaSunet: () => void;
+}) {
   const putinaMiscare = useReducedMotion();
   const pas = putinaMiscare ? 0.35 : 1.5;
-
-  useEffect(() => {
-    const el = audio.current;
-    if (!el) return;
-    let anulat = false;
-
-    // "Redă" a fost un gest al utilizatorului, deci play() ar trebui sa treaca;
-    // daca browserul refuza totusi, lasam butonul de sunet sa porneasca manual.
-    el.volume = 0;
-    el.play()
-      .then(() => {
-        // urcam volumul lin in 3 secunde, ca melodia sa nu intre brusc peste text
-        const start = performance.now();
-        const urca = (acum: number) => {
-          if (anulat) return;
-          const k = Math.min(1, (acum - start) / 3000);
-          el.volume = VOLUM * k;
-          if (k < 1) requestAnimationFrame(urca);
-        };
-        requestAnimationFrame(urca);
-      })
-      .catch(() => setOprit(true));
-
-    return () => {
-      anulat = true;
-    };
-  }, []);
 
   useEffect(() => {
     const la = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", la);
     return () => window.removeEventListener("keydown", la);
   }, [onClose]);
-
-  const comutaSunet = () => {
-    const el = audio.current;
-    if (!el) return;
-    if (el.paused) {
-      el.volume = VOLUM;
-      el.play().catch(() => undefined);
-      setOprit(false);
-    } else {
-      el.pause();
-      setOprit(true);
-    }
-  };
 
   return (
     <motion.div
@@ -1231,8 +1332,6 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
       transition={{ duration: 1.2, ease: "easeInOut" }}
       className="fixed inset-0 z-50 overflow-y-auto bg-black"
     >
-      <audio ref={audio} src={MUZICA} loop preload="auto" className="hidden" />
-
       {/* fundal cinematic */}
       <div className="pointer-events-none fixed inset-0">
         <div className="kenburns absolute inset-0 bg-[radial-gradient(60%_60%_at_50%_35%,rgba(229,9,20,0.22),transparent_65%),radial-gradient(45%_50%_at_20%_80%,rgba(190,24,93,0.18),transparent_70%)]" />
@@ -1273,7 +1372,7 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
         <ChevronLeft className="h-4 w-4" /> Înapoi la meniu
       </motion.button>
       <motion.button
-        aria-label={oprit ? "Pornește muzica" : "Oprește muzica"}
+        aria-label={canta ? "Oprește muzica" : "Pornește muzica"}
         initial={{ opacity: 0, x: 20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ delay: 0.6, duration: 0.6, ease: LIN }}
@@ -1282,10 +1381,10 @@ function PlayerModal({ onClose }: { onClose: () => void }) {
         onClick={comutaSunet}
         className="fixed right-4 top-4 z-30 flex h-11 w-11 items-center justify-center rounded-full border border-white/15 bg-white/10 text-white/80 backdrop-blur-md hover:bg-white/20 hover:text-white sm:right-8 sm:top-8"
       >
-        {oprit ? (
-          <VolumeX className="h-4 w-4" />
-        ) : (
+        {canta ? (
           <Volume2 className="h-4 w-4" />
+        ) : (
+          <VolumeX className="h-4 w-4" />
         )}
       </motion.button>
 
@@ -1338,6 +1437,65 @@ export default function ArianaFlix() {
   const [player, setPlayer] = useState(false);
   const [detaliu, setDetaliu] = useState<Titlu | null>(null);
 
+  // o singura melodie pentru tot site-ul: incet in fundal, mai tare sub scrisoare
+  const muzica = useRef<HTMLAudioElement>(null);
+  const rampa = useRef<number | null>(null);
+  const pornita = useRef(false);
+  const [canta, setCanta] = useState(false);
+
+  const duVolumulLa = useCallback((tinta: number, ms: number) => {
+    const el = muzica.current;
+    if (!el) return;
+    if (rampa.current) cancelAnimationFrame(rampa.current);
+    const start = performance.now();
+    const deLa = el.volume;
+    const pas = (acum: number) => {
+      const k = Math.min(1, (acum - start) / ms);
+      el.volume = deLa + (tinta - deLa) * k;
+      if (k < 1) rampa.current = requestAnimationFrame(pas);
+    };
+    rampa.current = requestAnimationFrame(pas);
+  }, []);
+
+  // porneste imediat ce s-a terminat intro-ul. Daca intro-ul a rulat cu sunet,
+  // browserul ne lasa si aici; daca a cerut un tap, tap-ul acela ne-a deblocat deja.
+  useEffect(() => {
+    if (ecran === "splash" || pornita.current) return;
+    pornita.current = true;
+    const el = muzica.current;
+    if (!el) return;
+    el.volume = 0;
+    el.play()
+      .then(() => {
+        setCanta(true);
+        duVolumulLa(VOLUM_FUNDAL, 4000);
+      })
+      .catch(() => setCanta(false));
+  }, [ecran, duVolumulLa]);
+
+  // sub scrisoare urca, la iesire coboara la loc
+  useEffect(() => {
+    if (!canta) return;
+    duVolumulLa(player ? VOLUM_SCRISOARE : VOLUM_FUNDAL, player ? 2500 : 1200);
+  }, [player, canta, duVolumulLa]);
+
+  const comutaSunet = useCallback(() => {
+    const el = muzica.current;
+    if (!el) return;
+    if (el.paused) {
+      el.volume = 0;
+      el.play()
+        .then(() => {
+          setCanta(true);
+          duVolumulLa(player ? VOLUM_SCRISOARE : VOLUM_FUNDAL, 900);
+        })
+        .catch(() => setCanta(false));
+    } else {
+      el.pause();
+      setCanta(false);
+    }
+  }, [player, duVolumulLa]);
+
   const laProfiles = useCallback(() => setEcran("profiles"), []);
   const laDashboard = useCallback(() => setEcran("dashboard"), []);
   const inchidePlayer = useCallback(() => setPlayer(false), []);
@@ -1355,6 +1513,8 @@ export default function ArianaFlix() {
 
   return (
     <main className="relative min-h-dvh bg-cinema">
+      <audio ref={muzica} src={MUZICA} loop preload="auto" className="hidden" />
+
       <AnimatePresence mode="wait">
         {ecran === "splash" && (
           <SplashView key="splash" onFinish={laProfiles} />
@@ -1365,6 +1525,8 @@ export default function ArianaFlix() {
         {ecran === "dashboard" && (
           <DashboardView
             key="dashboard"
+            canta={canta}
+            comutaSunet={comutaSunet}
             onPlay={deschidePlayer}
             onSelect={setDetaliu}
           />
@@ -1390,7 +1552,14 @@ export default function ArianaFlix() {
       </AnimatePresence>
 
       <AnimatePresence>
-        {player && <PlayerModal key="player" onClose={inchidePlayer} />}
+        {player && (
+          <PlayerModal
+            key="player"
+            onClose={inchidePlayer}
+            canta={canta}
+            comutaSunet={comutaSunet}
+          />
+        )}
       </AnimatePresence>
     </main>
   );
