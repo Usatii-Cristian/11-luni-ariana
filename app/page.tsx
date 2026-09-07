@@ -210,7 +210,7 @@ const RANDURI: Rand[] = [
         emoji: "🧸",
         culori: ["#7c3aed", "#26104d"],
         descriere:
-          "Nu te lasă din brațe și te copiază în tot ce faci — până și botul din poză l-a învățat de la tine. Copiii simt oamenii buni din prima, iar pe tine te-a găsit imediat.",
+          "Nu te lasă din brațe și te copiază în tot ce faci — până și felul în care te strâmbi la aparat l-a prins de la tine. Copiii simt oamenii buni din prima, iar pe tine te-a găsit imediat.",
       },
       {
         id: "f3",
