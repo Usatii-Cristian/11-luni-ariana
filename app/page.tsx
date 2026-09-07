@@ -197,11 +197,11 @@ const RANDURI: Rand[] = [
       {
         id: "f1",
         poza: "/poze/f1.jpg",
-        nume: "Cearta despre ce film vedem",
-        emoji: "🍿",
+        nume: "Fața ta când te plictisești",
+        emoji: "😒",
         culori: ["#e50914", "#3a060b"],
         descriere:
-          "Patruzeci de minute de negociat, zece minute de film, adormit amândoi. Clasic. Nu schimb nimic.",
+          "Sala de sport, o bancă și zero chef. Tu cu telefonul în mână și cu privirea aia care zice „când se termină?”. Nici măcar nu știai că te fotografiez. A ieșit una dintre preferatele mele.",
       },
       {
         id: "f2",
