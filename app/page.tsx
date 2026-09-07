@@ -219,7 +219,7 @@ const RANDURI: Rand[] = [
         emoji: "💐",
         culori: ["#0369a1", "#04202f"],
         descriere:
-          "Eu le-am ales, tu le-ai cărat până acasă, și până la urmă tot mama ta a rămas cu ele. Nu mă plâng: a ieșit poza asta, deci tot eu am câștigat.",
+          "Le-ai ales singură, le-ai cărat până acasă, și până la urmă tot mama ta a rămas cu ele. Nu mă plâng: a ieșit poza asta, deci tot eu am câștigat.",
       },
       {
         id: "f4",
