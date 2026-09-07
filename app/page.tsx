@@ -206,38 +206,38 @@ const RANDURI: Rand[] = [
       {
         id: "f2",
         poza: "/poze/f2.jpg",
-        nume: "Dansul tău când crezi că nu te văd",
-        emoji: "💃",
+        nume: "Tu și cea mică",
+        emoji: "🧸",
         culori: ["#7c3aed", "#26104d"],
         descriere:
-          "Te văd. De fiecare dată. Și de fiecare dată e cel mai bun lucru care mi se întâmplă în ziua aia.",
+          "Nu te lasă din brațe și te copiază în tot ce faci — până și botul din poză l-a învățat de la tine. Copiii simt oamenii buni din prima, iar pe tine te-a găsit imediat.",
       },
       {
         id: "f3",
         poza: "/poze/f3.jpg",
-        nume: "Mesajele scrise greșit la 3 dimineața",
-        emoji: "📱",
+        nume: "Florile soacră-mii",
+        emoji: "💐",
         culori: ["#0369a1", "#04202f"],
         descriere:
-          "Jumătate din ele nu aveau niciun sens. Le-am păstrat pe toate.",
+          "Eu le-am ales, tu le-ai cărat până acasă, și până la urmă tot mama ta a rămas cu ele. Nu mă plâng: a ieșit poza asta, deci tot eu am câștigat.",
       },
       {
         id: "f4",
         poza: "/poze/f4.jpg",
-        nume: "Când ai adormit în mijlocul filmului",
-        emoji: "😴",
+        nume: "8 Martie, cu cerul senin",
+        emoji: "☀️",
         culori: ["#1e293b", "#0a0f19"],
         descriere:
-          "Am oprit filmul. M-am uitat la tine în loc. Sincer, avea un scenariu mult mai bun.",
+          "De 8 martie toată lumea dăruiește flori. Eu am dat flori și am primit înapoi ziua asta: cer senin, geci groase și tu făcând bot în poză. Cred că am ieșit în câștig.",
       },
       {
         id: "f5",
         poza: "/poze/f5.jpg",
-        nume: "Selfie-urile ratate",
-        emoji: "📸",
+        nume: "Prima dată la tine acasă",
+        emoji: "🐶",
         culori: ["#ca8a04", "#3a2803"],
         descriere:
-          "Douăzeci de poze proaste ca să iasă una bună. Alea proaste sunt preferatele mele.",
+          "Prima oară când am venit la voi. Tu, cu filtru de cățel și cu tot cadrul al tău. Eu, îndesat în colț și tăiat pe jumătate. Un cadru „reușit”, pe care nu l-aș reface pentru nimic.",
       },
       {
         id: "f6",
