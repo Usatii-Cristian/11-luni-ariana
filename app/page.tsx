@@ -132,7 +132,7 @@ const RANDURI: Rand[] = [
         emoji: "🎧",
         culori: ["#065f46", "#04241b"],
         descriere:
-          "Nu doar auzi. Asculți. Te uiți în ochii mei și dintr-odată tot ce spun pare că are importanță.",
+          "Sincer? În ochi nu te uiți mai niciodată, te învârți ca un titirez și nu stai astâmpărată nicio secundă. Și totuși auzi tot. Habar n-am cum reușești, dar mă asculți mai bine decât oricine.",
       },
       {
         id: "m3",
