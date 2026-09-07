@@ -228,7 +228,7 @@ const RANDURI: Rand[] = [
         emoji: "☀️",
         culori: ["#1e293b", "#0a0f19"],
         descriere:
-          "De 8 martie toată lumea dăruiește flori. Eu am dat flori și am primit înapoi ziua asta: cer senin, geci groase și tu făcând bot în poză. Cred că am ieșit în câștig.",
+          "De 8 martie toată lumea dăruiește flori. Eu am dat flori și am primit înapoi ziua asta: cer senin, geci groase și tu, frumoasă de nu-mi venea să mă uit în altă parte. Cred că am ieșit în câștig.",
       },
       {
         id: "f5",
