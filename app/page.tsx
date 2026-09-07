@@ -201,7 +201,7 @@ const RANDURI: Rand[] = [
         emoji: "😒",
         culori: ["#e50914", "#3a060b"],
         descriere:
-          "Sala de sport, un scaun și zero chef. Erai săturată de tot: tu cu telefonul în mână și cu privirea aia care zice „când se termină?”.",
+          "Sala de sport, un scaun și zero chef. Erai săturată de tot, se citea pe fața ta de la un kilometru.",
       },
       {
         id: "f2",
